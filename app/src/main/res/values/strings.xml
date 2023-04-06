@@ -1,7 +1,6 @@
 <resources>
-    <string name="app_name">AquaBlue</string>
+    <string name="app_name">Aquarium IoT</string>
     <string name="devices">Bluetooth Devices</string>
-
     <string name="bluetooth_permission_title">Bluetooth permission</string>
     <string name="bluetooth_permission_grant">Bluetooth permission is required by this App. Please grant in next dialog.</string>
     <string name="bluetooth_permission_denied">Bluetooth permission was permanently denied. You have to enable permission \"%s\" in App settings.</string>
@@ -42,7 +41,24 @@
     <string name="lasted_update_date_string">Cập nhật vào</string>
     <string name="my_wifi">Lethuy_2.4Ghz</string>
     <string name="my_password">11336688</string>
-    <string name="lab_wifi">ThaoAn/2.4G</string>
-    <string name="lab_password">123456789</string>
-    <string name="button_control_string">Điều khiển</string>
+    <string name="default_ssid_wifi"></string>
+    <string name="default_ssid_password"></string>
+    <string name="button_control_string">Cập nhật điều khiển</string>
+    <string name="button_choosing_fish">Chọn các loại cá</string>
+    <string name="button_confirm">Xác nhận</string>
+    <string name="button_go_back">Quay lại</string>
+    <string name="button_close">Đóng</string>
+    <string name="fish_other_information_default">Không có thông tin</string>
+    <string name="desired_temperature_suggest">Nhiệt độ cài đặt</string>
+    <string name="tat">Tắt</string>
+    <string name="bat">Bật</string>
+    <string name="title_activity_choosing_fish">ChoosingFishActivity</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
 </resources>

@@ -10,7 +10,7 @@
         android:id="@+id/main_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/green_white">
+        android:background="@color/slight_blue">
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/gl_vertical_begin"
@@ -88,7 +88,7 @@
                 app:srcCompat="@drawable/bluetooth_disabled_icon" />
 
             <ImageButton
-                android:id="@+id/buttonSetting"
+                android:id="@+id/wifi_setting_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bored_left_side_only"
@@ -111,7 +111,7 @@
                 android:textColor="@color/black"
                 android:textSize="15sp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/buttonSetting"
+                app:layout_constraintEnd_toStartOf="@+id/wifi_setting_btn"
                 app:layout_constraintHorizontal_bias="0.4"
                 app:layout_constraintStart_toEndOf="@+id/iconBluetooth"
                 app:layout_constraintTop_toTopOf="parent"
@@ -377,8 +377,8 @@
                     android:layout_marginEnd="14sp"
                     android:text="@string/heater_button_text"
                     android:textColor="@color/black"
-                    android:textOff="Tắt"
-                    android:textOn="Bật" />
+                    android:textOff="@string/tat"
+                    android:textOn="@string/bat"/>
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/chiller_switch"
@@ -388,16 +388,16 @@
                     android:scaleType="centerInside"
                     android:text="@string/chiller_button_text"
                     android:textColor="@color/black"
-                    android:textOff="Tắt"
-                    android:textOn="Bật" />
+                    android:textOff="@string/tat"
+                    android:textOn="@string/bat" />
 
                 <EditText
                     android:id="@+id/desired_temp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="0sp"
+                    android:layout_height="55dp"
                     android:layout_weight="1"
-                    android:ems="10"
-                    android:hint="Nhiệt độ cài đặt"
+                    android:ems="8"
+                    android:hint="@string/desired_temperature_suggest"
                     android:inputType="number"
                     android:textColor="@color/black"
                     android:textSize="14sp" />
@@ -405,18 +405,68 @@
             </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <Button
-            android:id="@+id/control_button"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/button_groups"
             android:layout_width="0sp"
             android:layout_height="wrap_content"
             android:layout_marginTop="15sp"
-            android:text="@string/button_control_string"
-            android:backgroundTint="@color/colorSendText"
-            android:textColor="@color/white"
+            android:backgroundTint="@color/white"
             app:layout_constraintEnd_toStartOf="@+id/gl_vertical_end"
             app:layout_constraintStart_toStartOf="@+id/gl_vertical_begin"
-            app:layout_constraintTop_toBottomOf="@+id/control_layout" />
+            app:layout_constraintTop_toBottomOf="@+id/control_layout">
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="3sp"
+                android:orientation="horizontal"
+                android:weightSum="1"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
+                <Button
+                    android:id="@+id/control_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="12sp"
+                    android:textSize="11sp"
+                    android:backgroundTint="@color/do_huong"
+                    android:text="@string/button_control_string"
+                    android:textColor="@color/white"/>
+            </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/recommend_environment"
+            android:layout_width="0sp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15sp"
+            android:backgroundTint="@color/white"
+            app:layout_constraintEnd_toStartOf="@+id/gl_vertical_end"
+            app:layout_constraintStart_toStartOf="@+id/gl_vertical_begin"
+            app:layout_constraintTop_toBottomOf="@+id/button_groups">
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="3sp"
+                android:orientation="horizontal"
+                android:weightSum="1"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+                <Button
+                    android:id="@+id/choosing_fish_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/do_huong"
+                    android:text="@string/button_choosing_fish"
+                    android:textColor="@color/white"
+                    android:textSize="11sp" />
+            </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
 </FrameLayout>

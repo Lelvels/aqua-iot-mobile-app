@@ -17,7 +17,6 @@ public class RetrofitClient {
         OkHttpClient client = new OkHttpClient.Builder()
                 .addInterceptor(logging)
                 .build();
-
         if (retrofit==null) {
             Gson gson = new GsonBuilder()
                     .setLenient()

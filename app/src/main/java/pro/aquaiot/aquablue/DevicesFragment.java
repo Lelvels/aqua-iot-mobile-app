@@ -134,13 +134,13 @@ public class DevicesFragment extends ListFragment {
             }
         }
         if(bluetoothAdapter == null)
-            setEmptyText("<bluetooth not supported>");
+            setEmptyText("<Bluetooth đang không được hỗ trợ");
         else if(!bluetoothAdapter.isEnabled())
-            setEmptyText("<bluetooth is disabled>");
+            setEmptyText("Bluetooth đang không được bật");
         else if(permissionMissing)
-            setEmptyText("<permission missing, use REFRESH>");
+            setEmptyText("Hãy cấp quyền Bluetooth cho ứng dụng, nhấn nút REFRESH để tải lại");
         else
-            setEmptyText("<no bluetooth devices found>");
+            setEmptyText("Không có thiết bị nào được tìm thấy!");
         listAdapter.notifyDataSetChanged();
     }
 
@@ -151,7 +151,6 @@ public class DevicesFragment extends ListFragment {
         Bundle args = new Bundle();
         args.putString("device_address", device.getAddress());
         args.putString("device_name", device.getName());
-        //Fragment fragment = new ControlFragment();
         Fragment fragment = new UiControl();
         fragment.setArguments(args);
         getParentFragmentManager().beginTransaction().replace(R.id.fragment, fragment, "UiControl").addToBackStack(null).commit();
