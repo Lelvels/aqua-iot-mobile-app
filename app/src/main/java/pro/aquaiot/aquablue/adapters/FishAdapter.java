@@ -1,5 +1,6 @@
 package pro.aquaiot.aquablue.adapters;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import pro.aquaiot.aquablue.R;
@@ -20,7 +22,6 @@ import pro.aquaiot.aquablue.data.model.Fish;
 
 public class FishAdapter extends RecyclerView.Adapter<FishAdapter.FishViewHolder> {
     private List<Fish> fishes;
-
     public FishAdapter(List<Fish> fishes) {
         this.fishes = fishes;
     }

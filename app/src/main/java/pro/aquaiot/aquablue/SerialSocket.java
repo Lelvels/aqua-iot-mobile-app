@@ -29,7 +29,6 @@ public class SerialSocket implements Runnable {
     private boolean connected;
 
     public SerialSocket(Context context, BluetoothDevice device) {
-        //TODO: What is this mean ?
         if(context instanceof Activity)
             throw new InvalidParameterException("expected non UI context");
         this.device = device;

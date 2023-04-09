@@ -94,10 +94,11 @@ public class UiControl extends Fragment implements ServiceConnection, SerialList
     private EditText desiredTemp;
     private Button controlButton;
     private Button choosingFishButton;
+
+    private Button fishAnalysisButton;
     //Pop-up UI members
     private EditText cpSSID;
     private EditText cpPassword;
-    private Button cpDebugModeButton;
     private Button cpCancelBtn;
     //Dialog Builder
     private AlertDialog.Builder getDialogBuilder;
@@ -186,9 +187,13 @@ public class UiControl extends Fragment implements ServiceConnection, SerialList
         modeButton = view.findViewById(R.id.mode_button);
         desiredTemp = view.findViewById(R.id.desired_temp); desiredTemp.setText("0");
         controlButton = view.findViewById(R.id.control_button);
+        fishAnalysisButton = view.findViewById(R.id.recommendation_button);
         //Onclick listeners
         wifiSettingButton.setOnClickListener(v -> {
             createNewWifiSettingDialog();
+        });
+        fishAnalysisButton.setOnClickListener(v->{
+            openEnvironmentAnalysisDialog();
         });
         modeButton.setOnClickListener(v -> {
             desired.setAutoMode(!desired.getAutoMode());
@@ -218,7 +223,7 @@ public class UiControl extends Fragment implements ServiceConnection, SerialList
         aquaService = ApiUtils.getAquaService();
         UpdateSensorDataThread updateSensorDataThread = new UpdateSensorDataThread();
         new Thread(updateSensorDataThread).start();
-        getDesired();
+        getDeviceDesired();
         return view;
     }
     /*
@@ -255,8 +260,8 @@ public class UiControl extends Fragment implements ServiceConnection, SerialList
             }
         });
     }
-    private void getDesired() {
-        aquaService.getAnswers().enqueue(new Callback<AquaDeviceTwin>() {
+    private void getDeviceDesired() {
+        aquaService.getDeviceTwin().enqueue(new Callback<AquaDeviceTwin>() {
             @Override
             public void onResponse(@NonNull Call<AquaDeviceTwin> call, @NonNull Response<AquaDeviceTwin> response) {
                 if (response.isSuccessful()) {
@@ -326,7 +331,6 @@ public class UiControl extends Fragment implements ServiceConnection, SerialList
             while (keepSendRequestToServer){
                 try{
                     pollingDataHandler.post(UiControl.this::getLatestSensorValues);
-                    pollingDataHandler.post(UiControl.this::getDesired);
                     Thread.sleep(pullingPeriod);
                 } catch (Exception e){
                     errorLog(e.getMessage());
@@ -409,6 +413,14 @@ public class UiControl extends Fragment implements ServiceConnection, SerialList
         }
     }
 
+    private void openEnvironmentAnalysisDialog(){
+        getDialogBuilder = new AlertDialog.Builder(getActivity());
+        final View envAnalysisPopupView = getLayoutInflater().inflate(R.layout.recommendation_for_environment_popup, null);
+        dialog = getDialogBuilder.create();
+        dialog.setView(envAnalysisPopupView);
+        dialog.show();
+    }
+
     /*
      * Bluetooth UI
      * */
@@ -433,7 +445,6 @@ public class UiControl extends Fragment implements ServiceConnection, SerialList
         cpSSID.setText(getString(R.string.default_ssid_wifi));
         cpPassword.setText(R.string.default_ssid_password);
         Button cpSubmitButton = connectivityPopupView.findViewById(R.id.wifi_submit_btn);
-        cpDebugModeButton = connectivityPopupView.findViewById(R.id.debug_mode_btn);
         cpCancelBtn = connectivityPopupView.findViewById(R.id.cancel_btn);
         cpSubmitButton.setOnClickListener(v->{
             if(bluetoothConnected == BluetoothConnected.True){

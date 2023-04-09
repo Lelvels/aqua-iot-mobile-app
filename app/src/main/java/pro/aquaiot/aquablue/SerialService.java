@@ -59,7 +59,6 @@ public class SerialService extends Service implements SerialListener {
     private static final String TAG = "SerialService";
     private final Handler mainLooper;
     private final IBinder binder;
-    //Why he need up to 2 queue ?
     private final ArrayDeque<QueueItem> queue1, queue2;
     private final QueueItem lastRead;
 
@@ -247,7 +246,7 @@ public class SerialService extends Service implements SerialListener {
     }
 
     /**
-     * Why we need to create this function ???
+     * Called when the data from serial is an
      * @param datas
      */
     @Override
