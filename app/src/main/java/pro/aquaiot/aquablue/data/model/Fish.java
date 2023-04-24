@@ -12,10 +12,10 @@ public class Fish {
     private String fishName;
     @SerializedName("fishMinpH")
     @Expose
-    private Integer fishMinpH;
+    private Float fishMinpH;
     @SerializedName("fishMaxpH")
     @Expose
-    private Integer fishMaxpH;
+    private Float fishMaxpH;
     @SerializedName("fishMinTds")
     @Expose
     private Integer fishMinTds;
@@ -48,19 +48,19 @@ public class Fish {
         this.fishName = fishName;
     }
 
-    public Integer getFishMinpH() {
+    public Float getFishMinpH() {
         return fishMinpH;
     }
 
-    public void setFishMinpH(Integer fishMinpH) {
+    public void setFishMinpH(Float fishMinpH) {
         this.fishMinpH = fishMinpH;
     }
 
-    public Integer getFishMaxpH() {
+    public Float getFishMaxpH() {
         return fishMaxpH;
     }
 
-    public void setFishMaxpH(Integer fishMaxpH) {
+    public void setFishMaxpH(Float fishMaxpH) {
         this.fishMaxpH = fishMaxpH;
     }
 

@@ -102,6 +102,10 @@ public class FishForAquariumActivity extends AppCompatActivity {
                     fishList.addAll(result);
                     fishAdapter.notifyDataSetChanged();
                     getFishInAquarium();
+                } else {
+                    Toast.makeText(FishForAquariumActivity.this,
+                            "Hiện tại chưa có loài cá nào trong cơ sở dữ liệu",
+                            Toast.LENGTH_SHORT).show();
                 }
             }
             @Override
@@ -148,13 +152,13 @@ public class FishForAquariumActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<AquariumData> call, Response<AquariumData> response) {
                 if(response.isSuccessful()){
-                    if(response.body() != null){
+                    if(response.body().getAquarium() != null){
                         aquarium = response.body().getAquarium();
+                        Log.i(TAG, "Get aquarium: " + aquarium.toString());
+                        getAllFishes();
                     } else {
                         createAquarium(aquariumName, "New aquarium created by AquaBlue");
                     }
-                    getFishInAquarium();
-                    getAllFishes();
                 } else {
                     Toast.makeText(FishForAquariumActivity.this,
                             "Không thể nhận dữ liệu từ Server, hãy kiểm tra đường truyền và thử lại sau",
@@ -176,10 +180,22 @@ public class FishForAquariumActivity extends AppCompatActivity {
         call.enqueue(new Callback<AquariumData>() {
             @Override
             public void onResponse(Call<AquariumData> call, Response<AquariumData> response) {
-                AquariumData aquariumData = response.body();
-                if(aquariumData != null && aquariumData.getAquarium() != null){
-                    aquarium = aquariumData.getAquarium();
-                    Log.i(TAG, "Create new aquarium: " + aquarium.toString());
+                if(response.isSuccessful()){
+                    if(response.body() != null) {
+                        aquarium = response.body().getAquarium();
+                        Log.i(TAG, "Create new aquarium: " + aquarium.toString());
+                        getFishInAquarium();
+                        getAllFishes();
+                    }
+                    else {
+                        Toast.makeText(FishForAquariumActivity.this,
+                                "Không thể nhận dữ liệu từ Server, hãy kiểm tra đường truyền và thử lại sau",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(FishForAquariumActivity.this,
+                            "Không thể nhận dữ liệu từ Server, hãy kiểm tra đường truyền và thử lại sau",
+                            Toast.LENGTH_SHORT).show();
                 }
             }
             @Override
@@ -190,12 +206,13 @@ public class FishForAquariumActivity extends AppCompatActivity {
     }
 
     public void updateFishInAquarium(){
-        Toast.makeText(this, "Đang cập nhật, xin đừng tắt!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Đang cập nhật", Toast.LENGTH_SHORT).show();
         AquaApplicationService aquaApplicationService = RetrofitInstance.getService();
         List<Integer> fishIds = new ArrayList<>();
         if(fishList != null){
             for(int i = 0; i<fishList.size(); i++){
-                CheckBox checkBox = (CheckBox) Objects.requireNonNull(recyclerView.getLayoutManager())
+                Log.i(TAG, "Iter though i = " + i);
+                CheckBox checkBox =  Objects.requireNonNull(recyclerView.getLayoutManager())
                                     .findViewByPosition(i)
                                     .findViewById(R.id.item_fish_cb);
                 if(checkBox.isChecked()){

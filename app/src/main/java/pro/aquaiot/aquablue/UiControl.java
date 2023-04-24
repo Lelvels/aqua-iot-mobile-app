@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -165,6 +166,12 @@ public class UiControl extends Fragment implements ServiceConnection, SerialList
         }
     }
 
+    public boolean isNetworkAvailable(Context context) {
+        ConnectivityManager connectivityManager = ((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE));
+        return connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnected();
+    }
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -188,43 +195,66 @@ public class UiControl extends Fragment implements ServiceConnection, SerialList
         desiredTemp = view.findViewById(R.id.desired_temp); desiredTemp.setText("0");
         controlButton = view.findViewById(R.id.control_button);
         fishAnalysisButton = view.findViewById(R.id.recommendation_button);
-        //Onclick listeners
-        wifiSettingButton.setOnClickListener(v -> {
-            createNewWifiSettingDialog();
-        });
-        fishAnalysisButton.setOnClickListener(v->{
-            openEnvironmentAnalysisDialog();
-        });
-        modeButton.setOnClickListener(v -> {
-            desired.setAutoMode(!desired.getAutoMode());
-            if(desired.getAutoMode()){
-                modeStateTxt.setText(R.string.auto_mode);
-            } else {
-                modeStateTxt.setText(R.string.manual_mode);
-            }
-        });
-        heaterSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            desired.setHeater(isChecked);
-        });
-        chillerSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            desired.setChiller(isChecked);
-        });
-        controlButton.setOnClickListener(v -> {
-            patchDesired();
-        });
-        choosingFishButton.setOnClickListener(v -> {
-            Bundle bundle = new Bundle();
-            bundle.putString("device_name", deviceName);
-            Intent switchIntent = new Intent(getActivity(), FishForAquariumActivity.class);
-            switchIntent.putExtras(bundle);
-            startActivity(switchIntent);
-        });
-        //Starting services
-        aquaService = ApiUtils.getAquaService();
-        UpdateSensorDataThread updateSensorDataThread = new UpdateSensorDataThread();
-        new Thread(updateSensorDataThread).start();
-        getDeviceDesired();
+        if(isNetworkAvailable(getActivity().getApplicationContext())) {
+            //Onclick listeners
+            wifiSettingButton.setOnClickListener(v -> {
+                createNewWifiSettingDialog();
+            });
+            fishAnalysisButton.setOnClickListener(v->{
+                openEnvironmentAnalysisDialog();
+            });
+            modeButton.setOnClickListener(v -> {
+                desired.setAutoMode(!desired.getAutoMode());
+                if(desired.getAutoMode()){
+                    modeStateTxt.setText(R.string.auto_mode);
+                } else {
+                    modeStateTxt.setText(R.string.manual_mode);
+                }
+            });
+            heaterSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                desired.setHeater(isChecked);
+            });
+            chillerSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                desired.setChiller(isChecked);
+            });
+            controlButton.setOnClickListener(v -> {
+                patchDesired();
+            });
+            choosingFishButton.setOnClickListener(v -> {
+                Bundle bundle = new Bundle();
+                bundle.putString("device_name", deviceName);
+                Intent switchIntent = new Intent(getActivity(), FishForAquariumActivity.class);
+                switchIntent.putExtras(bundle);
+                startActivity(switchIntent);
+            });
+            //Starting services
+            aquaService = ApiUtils.getAquaService();
+            UpdateDataThread updateDataThread = new UpdateDataThread();
+            new Thread(updateDataThread).start();
+            getDeviceInformation();
+        } else {
+            Toast.makeText(getActivity(), "Hiện không có kết nối mạng, vui lòng thử lại sau", Toast.LENGTH_SHORT).show();
+        }
+
         return view;
+    }
+    /*
+    * Update Data Thread
+    * */
+
+    class UpdateDataThread implements Runnable {
+        @Override
+        public void run() {
+            while (keepSendRequestToServer){
+                try{
+                    pollingDataHandler.post(UiControl.this::getLatestSensorValues);
+                    pollingDataHandler.post(UiControl.this::getDeviceInformation);
+                    Thread.sleep(pullingPeriod);
+                } catch (Exception e){
+                    errorLog(e.getMessage());
+                }
+            }
+        }
     }
     /*
     * Internet services
@@ -245,7 +275,7 @@ public class UiControl extends Fragment implements ServiceConnection, SerialList
                         } catch (Exception e){
                             errorLog(e.getMessage());
                         }
-                        status("GET: " + response.body().getData());
+                        status("GET id: " + response.body().getId() + ", with data: " + response.body().getData());
                         renderSensorData();
                     } else {
                         errorLog("Cannot get the data because it is null!");
@@ -260,7 +290,7 @@ public class UiControl extends Fragment implements ServiceConnection, SerialList
             }
         });
     }
-    private void getDeviceDesired() {
+    private void getDeviceInformation() {
         aquaService.getDeviceTwin().enqueue(new Callback<AquaDeviceTwin>() {
             @Override
             public void onResponse(@NonNull Call<AquaDeviceTwin> call, @NonNull Response<AquaDeviceTwin> response) {
@@ -322,20 +352,6 @@ public class UiControl extends Fragment implements ServiceConnection, SerialList
             });
         } else {
             Toast.makeText(getActivity(), "Hãy nhập nhiệt độ mong muốn", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    class UpdateSensorDataThread implements Runnable {
-        @Override
-        public void run() {
-            while (keepSendRequestToServer){
-                try{
-                    pollingDataHandler.post(UiControl.this::getLatestSensorValues);
-                    Thread.sleep(pullingPeriod);
-                } catch (Exception e){
-                    errorLog(e.getMessage());
-                }
-            }
         }
     }
 
@@ -555,7 +571,8 @@ public class UiControl extends Fragment implements ServiceConnection, SerialList
         if (msg.contains("WiFi connected")) {
             Toast.makeText(getActivity(), "Thiết bị đã kết nối WiFi", Toast.LENGTH_SHORT).show();
         } else if (msg.contains("WiFi not connected")){
-            Toast.makeText(getActivity(), "Thiết bị chưa kết nối được WiFi", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Đã xảy ra lỗi, có thể do tên WiFi hoặc mật khẩu bị nhập sai!",
+                    Toast.LENGTH_SHORT).show();
         } else {
             status("This string is out of scope of process!");
         }
