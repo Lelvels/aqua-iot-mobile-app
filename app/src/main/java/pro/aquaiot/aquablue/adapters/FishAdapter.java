@@ -22,8 +22,12 @@ import pro.aquaiot.aquablue.data.model.Fish;
 
 public class FishAdapter extends RecyclerView.Adapter<FishAdapter.FishViewHolder> {
     private List<Fish> fishes;
-    public FishAdapter(List<Fish> fishes) {
+    QuantityListener quantityListener;
+    ArrayList<Fish> fishArrayList = new ArrayList<>();
+
+    public FishAdapter(List<Fish> fishes, QuantityListener quantityListener) {
         this.fishes = fishes;
+        this.quantityListener = quantityListener;
     }
 
     @NonNull
@@ -36,13 +40,26 @@ public class FishAdapter extends RecyclerView.Adapter<FishAdapter.FishViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull FishViewHolder holder, int position) {
-        holder.textView.setText(fishes.get(position).getFishName());
-        Glide.with(holder.itemView.getContext())
-                .load(fishes.get(position).getPictureUrl())
-                .centerCrop()
-                .placeholder(R.drawable.img_placeholder)
-                .into(holder.imageView);
-        holder.checkBox.setChecked(false);
+        if(fishes != null && fishes.size()>0){
+            final Fish fish = fishes.get(position);
+            holder.textView.setText(fish.getFishName());
+            holder.desTemp.setText(fish.getStringTemp());
+            holder.desTds.setText(fish.getStringTds());
+            holder.desPh.setText(fish.getStringPh());
+            Glide.with(holder.itemView.getContext())
+                    .load(fish.getPictureUrl())
+                    .centerCrop()
+                    .placeholder(R.drawable.img_placeholder)
+                    .into(holder.imageView);
+            holder.checkBox.setOnClickListener(v -> {
+                if(holder.checkBox.isChecked()){
+                    fishArrayList.add(fish);
+                } else{
+                    fishArrayList.remove(fish);
+                }
+                quantityListener.onQuantityChange(fishArrayList);
+            });
+        }
     }
 
     @Override
@@ -50,16 +67,21 @@ public class FishAdapter extends RecyclerView.Adapter<FishAdapter.FishViewHolder
         return fishes.size();
     }
 
-    class FishViewHolder extends RecyclerView.ViewHolder{
+    class FishViewHolder extends RecyclerView.ViewHolder {
         TextView textView;
         ImageView imageView;
         CheckBox checkBox;
+        TextView desPh;
+        TextView desTemp;
+        TextView desTds;
         public FishViewHolder(@NonNull View itemView) {
             super(itemView);
             textView = itemView.findViewById(R.id.item_fish_name);
             imageView = itemView.findViewById(R.id.item_fish_image);
             checkBox = itemView.findViewById(R.id.item_fish_cb);
+            desPh = itemView.findViewById(R.id.item_fish_des_pH);
+            desTds = itemView.findViewById(R.id.item_fish_des_TDS);
+            desTemp = itemView.findViewById(R.id.item_fish_des_Temp);
         }
-
     }
 }

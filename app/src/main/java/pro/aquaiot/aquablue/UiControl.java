@@ -43,16 +43,26 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 import pro.aquaiot.aquablue.constants.WifiMethodNames;
 import pro.aquaiot.aquablue.data.model.AquaDeviceTwin;
+import pro.aquaiot.aquablue.data.model.Aquarium;
+import pro.aquaiot.aquablue.data.model.AquariumData;
+import pro.aquaiot.aquablue.data.model.CreateAquariumRequest;
 import pro.aquaiot.aquablue.data.model.Desired;
 import pro.aquaiot.aquablue.data.model.DesiredJSON;
+import pro.aquaiot.aquablue.data.model.Fish;
+import pro.aquaiot.aquablue.data.model.FishData;
 import pro.aquaiot.aquablue.data.model.SensorDataValues;
 import pro.aquaiot.aquablue.data.model.SensorsData;
 import pro.aquaiot.aquablue.data.remote.ApiUtils;
+import pro.aquaiot.aquablue.data.remote.AquaApplicationService;
 import pro.aquaiot.aquablue.data.remote.AquaService;
+import pro.aquaiot.aquablue.data.remote.RetrofitInstance;
 import pro.aquaiot.aquablue.fragments.TextUtil;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -68,11 +78,13 @@ public class UiControl extends Fragment implements ServiceConnection, SerialList
     private SensorDataValues sensorDataValues = new SensorDataValues();
     private String dataLatestDate;
     private AquaService aquaService;
+    private List<Fish> fishList;
     private final Handler pollingDataHandler = new Handler();
     private ESPWifiConnected espWifiConnected = ESPWifiConnected.False;
     //Bluetooth services members
     private String deviceAddress;
     private String deviceName;
+    private Aquarium aquarium = null;
     private SerialService service;
     private BluetoothConnected bluetoothConnected = BluetoothConnected.False;
     private boolean initialStart = true;
@@ -119,6 +131,7 @@ public class UiControl extends Fragment implements ServiceConnection, SerialList
         setRetainInstance(true);
         deviceAddress = getArguments().getString("device_address");
         deviceName = getArguments().getString("device_name");
+        fishList = new ArrayList<>();
     }
 
     @Override
@@ -332,7 +345,6 @@ public class UiControl extends Fragment implements ServiceConnection, SerialList
             }
         });
     }
-
     private void patchDesired(){
         if(!desiredTemp.getText().toString().equals("")){
             desired.setSetTemper(Integer.parseInt(desiredTemp.getText().toString()));
@@ -354,7 +366,204 @@ public class UiControl extends Fragment implements ServiceConnection, SerialList
             Toast.makeText(getActivity(), "Hãy nhập nhiệt độ mong muốn", Toast.LENGTH_SHORT).show();
         }
     }
+    public void startGetFishData(String aquariumName) {
+        AquaApplicationService aquaApplicationService = RetrofitInstance.getService();
+        Call<AquariumData> call = aquaApplicationService.getAquariumByName(aquariumName);
+        call.enqueue(new Callback<AquariumData>() {
+            @Override
+            public void onResponse(Call<AquariumData> call, Response<AquariumData> response) {
+                if(response.isSuccessful()){
+                    if(response.body().getAquarium() != null){
+                        aquarium = response.body().getAquarium();
+                        Log.i(TAG, "Get aquarium: " + aquarium.toString());
+                        getFishInAquarium();
+                    } else {
+                        createAquarium(aquariumName, "New aquarium created by AquaBlue");
+                    }
+                } else {
+                    Toast.makeText(getActivity(),
+                            "Không thể nhận dữ liệu từ Server, hãy kiểm tra đường truyền và thử lại sau",
+                            Toast.LENGTH_SHORT).show();
+                }
 
+            }
+            @Override
+            public void onFailure(Call<AquariumData> call, Throwable t) {
+                Log.e(TAG, t.getMessage());
+            }
+        });
+    }
+
+    public void createAquarium(String aquariumName, String description){
+        AquaApplicationService aquaApplicationService = RetrofitInstance.getService();
+        CreateAquariumRequest createAquariumRequest = new CreateAquariumRequest(aquariumName, description);
+        Call<AquariumData> call = aquaApplicationService.createNewAquarium(createAquariumRequest);
+        call.enqueue(new Callback<AquariumData>() {
+            @Override
+            public void onResponse(Call<AquariumData> call, Response<AquariumData> response) {
+                if(response.isSuccessful()){
+                    if(response.body() != null) {
+                        aquarium = response.body().getAquarium();
+                        Log.i(TAG, "Create new aquarium: " + aquarium.toString());
+                        getFishInAquarium();
+                    }
+                    else {
+                        Toast.makeText(getActivity(),
+                                "Không thể nhận dữ liệu từ Server, hãy kiểm tra đường truyền và thử lại sau",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(getActivity(),
+                            "Không thể nhận dữ liệu từ Server, hãy kiểm tra đường truyền và thử lại sau",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void onFailure(Call<AquariumData> call, Throwable t) {
+                Log.e(TAG, t.getMessage());
+            }
+        });
+    }
+
+    public void getFishInAquarium(){
+        AquaApplicationService aquaApplicationService = RetrofitInstance.getService();
+        Call<FishData> call = aquaApplicationService.getFishesByAquariumId(aquarium.getId());
+        call.enqueue(new Callback<FishData>() {
+            @Override
+            public void onResponse(Call<FishData> call, Response<FishData> response) {
+                FishData fishData = response.body();
+                if(fishData != null && fishData.getData() != null){
+                    List<Fish> result = fishData.getData();
+                    Log.i(TAG, "Fishes in aquarium: ");
+                    for(Fish fish : result){
+                        Log.i(TAG, fish.toString());
+                    }
+                    fishList.clear();
+                    fishList.addAll(result);
+                    //UI render and given analysis
+                    renderAnalysisPopUpView();
+                }
+            }
+            @Override
+            public void onFailure(Call<FishData> call, Throwable t) {
+                Log.e(TAG, t.getMessage());
+            }
+        });
+    }
+
+    private void renderAnalysisPopUpView(){
+        getDialogBuilder = new AlertDialog.Builder(getActivity());
+        final View envAnalysisPopupView = getLayoutInflater().inflate(R.layout.recommendation_for_environment_popup, null);
+        TextView fishTypeText = envAnalysisPopupView.findViewById(R.id.fish_types_details);
+        TextView pHText = envAnalysisPopupView.findViewById(R.id.analysis_ph_text);
+        TextView tempText = envAnalysisPopupView.findViewById(R.id.analysis_temp_text);
+        TextView TdsText = envAnalysisPopupView.findViewById(R.id.analysis_tds_text);
+
+        StringBuilder fishTypeBuilder = new StringBuilder();
+        StringBuilder fishPhBuilder = new StringBuilder();
+        StringBuilder fishTempBuilder = new StringBuilder();
+        StringBuilder fishTdsBuilder = new StringBuilder();
+
+        if(fishList != null && fishList.size() > 0){
+            Fish firstFish = fishList.get(0);
+            float idealMinPh = firstFish.getFishMinpH();
+            float idealMaxPh = firstFish.getFishMaxpH();
+            int idealMinTemp = firstFish.getFishMinTemperature();
+            int idealMaxTemp = firstFish.getFishMaxTemperature();
+            int idealMinTDS = firstFish.getFishMinTds();
+            int idealMaxTDS = firstFish.getFishMaxTds();
+            for (int i = 0; i < fishList.size(); i++) {
+                Fish fish = fishList.get(i);
+                fishTypeBuilder.append(fish.getFishName()).append(", ");
+                //pH
+                if(idealMinPh < fish.getFishMinpH()){
+                    idealMinPh = fish.getFishMinpH();
+                }
+                if(idealMaxPh > fish.getFishMaxpH()){
+                    idealMaxPh = fish.getFishMaxpH();
+                }
+                //temperature
+                if(idealMinTemp < fish.getFishMinTemperature()){
+                    idealMinTemp = fish.getFishMinTemperature();
+                }
+                if(idealMaxTemp > fish.getFishMaxTemperature()){
+                    idealMaxTemp = fish.getFishMaxTemperature();
+                }
+                //Tds
+                if(idealMinTDS < fish.getFishMinTds()){
+                    idealMinTDS = fish.getFishMinTds();
+                }
+                if(idealMaxTDS > fish.getFishMaxTds()){
+                    idealMaxTDS = fish.getFishMaxTds();
+                }
+            }
+            //fish name
+            if(fishTypeBuilder.length() > 2){
+                fishTypeText.setText(fishTypeBuilder.substring(0, fishTypeBuilder.length() - 2));
+            }
+            //pH
+            if(idealMinPh < idealMaxPh){
+                fishPhBuilder.append("pH trong khoảng: ");
+                fishPhBuilder.append(idealMinPh).append(" đến ").append(idealMaxPh);
+                pHText.setText(fishPhBuilder.toString());
+            } else {
+                fishPhBuilder.append("pH mâu thuẫn với các loài cá: ");
+                float finalIdealMaxPh = idealMaxPh;
+                float finalIdealMinPh = idealMinPh;
+                List<Fish> fishesCannotTogether = fishList.stream()
+                        .filter(s -> s.getFishMinpH() == finalIdealMinPh || s.getFishMaxpH() == finalIdealMaxPh)
+                        .collect(Collectors.toList());
+                if(fishesCannotTogether.size() > 0){
+                    for(Fish fish : fishesCannotTogether){
+                        fishPhBuilder.append(fish.getFishName()).append(", ");
+                    }
+                    pHText.setText(fishPhBuilder.substring(0, fishPhBuilder.length()-2));
+                }
+            }
+            //Temperature
+            if(idealMinTemp < idealMaxTemp){
+                fishTempBuilder.append("Nhiệt độ trong khoảng: ");
+                fishTempBuilder.append(idealMinTemp).append("°C đến ").append(idealMaxTemp).append("°C");
+                tempText.setText(fishTempBuilder.toString());
+            } else {
+                fishTempBuilder.append("Nhiệt độ mâu thuẫn với các loài cá: ");
+                int finalIdealMaxTemp = idealMaxTemp;
+                int finalIdealMinTemp = idealMinTemp;
+                List<Fish> fishesCannotTogether = fishList.stream()
+                        .filter(s -> s.getFishMaxTemperature() == finalIdealMaxTemp || s.getFishMinTemperature() == finalIdealMinTemp)
+                        .collect(Collectors.toList());
+                if(fishesCannotTogether.size() > 0){
+                    for(Fish fish : fishesCannotTogether){
+                        fishTempBuilder.append(fish.getFishName()).append(", ");
+                    }
+                    tempText.setText(fishTempBuilder.substring(0, fishTempBuilder.length()-2));
+                }
+            }
+            //tds
+            if(idealMinTDS < idealMaxTDS){
+                fishTdsBuilder.append("TDS trong khoảng: ");
+                fishTdsBuilder.append(idealMinTDS);
+                fishTdsBuilder.append(" ppm đến ").append(idealMaxTDS).append(" ppm");
+                TdsText.setText(fishTdsBuilder.toString());
+            } else {
+                fishTdsBuilder.append("TDS mâu thuẫn với các loài cá: ");
+                int finalIdealMaxTDS = idealMaxTDS;
+                int finalIdealMinTDS = idealMinTDS;
+                List<Fish> fishesCannotTogether = fishList.stream()
+                        .filter(s -> s.getFishMaxTds() == finalIdealMaxTDS || s.getFishMinTds() == finalIdealMinTDS)
+                        .collect(Collectors.toList());
+                if(fishesCannotTogether.size() > 0){
+                    for(Fish fish : fishesCannotTogether){
+                        fishTdsBuilder.append(fish.getFishName()).append(", ");
+                    }
+                    TdsText.setText(fishTdsBuilder.substring(0, fishTdsBuilder.length()-2));
+                }
+            }
+        }
+        dialog = getDialogBuilder.create();
+        dialog.setView(envAnalysisPopupView);
+        dialog.show();
+    }
     /*
     * Internet services UI render
     * */
@@ -430,11 +639,8 @@ public class UiControl extends Fragment implements ServiceConnection, SerialList
     }
 
     private void openEnvironmentAnalysisDialog(){
-        getDialogBuilder = new AlertDialog.Builder(getActivity());
-        final View envAnalysisPopupView = getLayoutInflater().inflate(R.layout.recommendation_for_environment_popup, null);
-        dialog = getDialogBuilder.create();
-        dialog.setView(envAnalysisPopupView);
-        dialog.show();
+        //Get information about the fish in aquarium
+        startGetFishData(deviceName);
     }
 
     /*

@@ -118,4 +118,18 @@ public class Fish {
                 ", pictureUrl='" + pictureUrl + '\'' +
                 '}';
     }
+
+    public String getStringPh(){
+        return  "pH: " + fishMinpH + " đến " + fishMaxpH;
+
+
+    }
+
+    public String getStringTds(){
+        return "Tds: " + fishMinTds + " đến " + fishMaxTds;
+    }
+    public String getStringTemp(){
+        return "Nhiệt Độ: " + fishMinTemperature + " đến " + fishMaxTemperature;
+    }
+
 }

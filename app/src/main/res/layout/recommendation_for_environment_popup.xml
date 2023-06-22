@@ -19,60 +19,103 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+
     <TextView
-        android:id="@+id/ideal_environment_title"
+        android:id="@+id/fish_types_titles"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="30dp"
-        android:layout_marginTop="12dp"
-        android:text="Đề xuất về môi trường:"
-        android:textColor="@color/aqua_green"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginTop="16dp"
+        android:text="Các loại cá trong bể của bạn là:"
+        android:textColor="@color/colorAccent"
         android:textSize="14sp"
         android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.068"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/setting_wifi_text_name" />
 
     <TextView
-        android:id="@+id/ideal_environment_numbers"
+        android:id="@+id/fish_types_details"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="30dp"
         android:layout_marginTop="12dp"
-        android:textColor="@color/aqua_green"
-        android:text="Không dề xuất nào!"
+        android:layout_marginEnd="12dp"
+        android:gravity="top"
+        android:maxLines="4"
+        android:text="Hiện không có cá nào trong bể"
+        android:textColor="@color/colorAccent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.119"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ideal_environment_title"
-        />
+        app:layout_constraintTop_toBottomOf="@+id/fish_types_titles" />
 
     <TextView
-        android:id="@+id/fish_detail_title"
+        android:id="@+id/ideal_environment_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="30dp"
+        android:layout_marginStart="12dp"
         android:layout_marginTop="12dp"
-        android:text="Các loại cá đang gặp vấn đề:"
-        android:textColor="@color/colorAccent"
+        android:layout_marginEnd="12dp"
+        android:text="Đề xuất về môi trường:"
+        android:textColor="@color/aqua_green"
         android:textSize="14sp"
         android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.048"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ideal_environment_numbers" />
+        app:layout_constraintTop_toBottomOf="@+id/fish_types_details" />
 
     <TextView
-        android:id="@+id/fish_details"
+        android:id="@+id/analysis_ph_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="30dp"
+        android:layout_marginStart="12dp"
         android:layout_marginTop="12dp"
-        android:layout_marginBottom="25sp"
-        android:textColor="@color/colorAccent"
-        android:text="Không có loài cá nào gặp vấn đề!"
+        android:layout_marginEnd="12dp"
+        android:maxLines="4"
+        android:text="Không có đề xuất về pH"
+        android:textColor="@color/aqua_green"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.05"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fish_detail_title" />
+        app:layout_constraintTop_toBottomOf="@+id/ideal_environment_title" />
+
+    <TextView
+        android:id="@+id/analysis_temp_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="12dp"
+        android:maxLines="4"
+        android:text="Không dề xuất nào về nhiệt độ"
+        android:textColor="@color/aqua_green"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.06"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/analysis_ph_text" />
+
+    <TextView
+        android:id="@+id/analysis_tds_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="12dp"
+        android:maxLines="4"
+        android:text="Không dề xuất nào về TDS"
+        android:textColor="@color/aqua_green"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.053"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/analysis_temp_text" />
 
     <Space
         android:layout_width="match_parent"
         android:layout_height="20dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fish_details"/>
+        app:layout_constraintTop_toBottomOf="@+id/analysis_tds_text"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

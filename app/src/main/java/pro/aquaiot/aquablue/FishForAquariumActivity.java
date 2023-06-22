@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Objects;
 
 import pro.aquaiot.aquablue.adapters.FishAdapter;
+import pro.aquaiot.aquablue.adapters.QuantityListener;
 import pro.aquaiot.aquablue.data.model.Aquarium;
 import pro.aquaiot.aquablue.data.model.AquariumData;
 import pro.aquaiot.aquablue.data.model.CreateAquariumRequest;
@@ -28,7 +29,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class FishForAquariumActivity extends AppCompatActivity {
+public class FishForAquariumActivity extends AppCompatActivity implements QuantityListener {
     private final String TAG = "FishAquaLog";
     private String aquariumName = "";
     private List<Fish> fishList;
@@ -38,21 +39,26 @@ public class FishForAquariumActivity extends AppCompatActivity {
     private Aquarium aquarium = null;
     private FishAdapter fishAdapter;
     private RecyclerView recyclerView;
+    private List<Fish> currentSelectedFishes;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fish_for_aquarium);
         Bundle bundle = getIntent().getExtras();
         aquariumName = bundle.getString("device_name");
+
+        fishList = new ArrayList<>();
+        fishInAquarium = new ArrayList<>();
+        currentSelectedFishes = new ArrayList<>();
+
         Log.i(TAG, "Starting FishForAquarium Activity with aquarium name: " + aquariumName);
         goBackButton = findViewById(R.id.af_go_back_button);
         goBackButton.setOnClickListener(v -> {
             finish();
         });
-        fishList = new ArrayList<>();
-        fishInAquarium = new ArrayList<>();
         recyclerView = findViewById(R.id.af_recycle_view);
-        fishAdapter = new FishAdapter(fishList);
+        fishAdapter = new FishAdapter(fishList, this);
+
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(FishForAquariumActivity.this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(fishAdapter);
@@ -61,6 +67,11 @@ public class FishForAquariumActivity extends AppCompatActivity {
             updateFishInAquarium();
         });
         getAquarium(aquariumName);
+    }
+
+    @Override
+    public void onQuantityChange(ArrayList<Fish> fishArrayList) {
+        currentSelectedFishes = fishArrayList;
     }
 
     @Override
@@ -129,13 +140,7 @@ public class FishForAquariumActivity extends AppCompatActivity {
                         Log.i(TAG, fish.toString());
                     }
                     fishInAquarium.addAll(result);
-                    ArrayList<Integer> dupIndex = findDuplicates(fishList, fishInAquarium);
-                    if(recyclerView.getLayoutManager() != null){
-                        for(Integer idx : dupIndex){
-                            CheckBox checkBox = (CheckBox) recyclerView.getLayoutManager().findViewByPosition(idx).findViewById(R.id.item_fish_cb);
-                            checkBox.setChecked(true);
-                        }
-                    }
+                    //TODO: Thêm phần cập nhật sẵn
                 }
             }
             @Override
@@ -205,50 +210,40 @@ public class FishForAquariumActivity extends AppCompatActivity {
         });
     }
 
-    public void updateFishInAquarium(){
-        Toast.makeText(this, "Đang cập nhật", Toast.LENGTH_SHORT).show();
-        AquaApplicationService aquaApplicationService = RetrofitInstance.getService();
-        List<Integer> fishIds = new ArrayList<>();
-        if(fishList != null){
-            for(int i = 0; i<fishList.size(); i++){
-                Log.i(TAG, "Iter though i = " + i);
-                CheckBox checkBox =  Objects.requireNonNull(recyclerView.getLayoutManager())
-                                    .findViewByPosition(i)
-                                    .findViewById(R.id.item_fish_cb);
-                if(checkBox.isChecked()){
-                    fishIds.add(fishList.get(i).getId());
-                }
+    public void updateFishInAquarium() {
+        if(currentSelectedFishes != null && currentSelectedFishes.size() > 0){
+            Toast.makeText(this, "Đang cập nhật", Toast.LENGTH_SHORT).show();
+            AquaApplicationService aquaApplicationService = RetrofitInstance.getService();
+            List<Integer> fishIds = new ArrayList<>();
+            for (Fish fish : currentSelectedFishes) {
+                fishIds.add(fish.getId());
             }
-        }
-        SyncFishAquaRequest syncFishAquaRequest = new SyncFishAquaRequest(aquarium.getId(), fishIds);
-        StringBuilder idString = new StringBuilder();
-        idString.append("Fishes id update: ");
-        for(Integer id : fishIds){
-            idString.append(id);
-            idString.append(",");
-        }
-        Log.i(TAG, idString.toString());
-        aquaApplicationService.syncFishInAquarium(syncFishAquaRequest).enqueue(new Callback<FishData>() {
-            @Override
-            public void onResponse(Call<FishData> call, Response<FishData> response) {
-                if(response.body() != null){
-                    List<Fish> resultFishList = response.body().getData();
-                    if(resultFishList != null){
-                        for(Fish fish : resultFishList){
-                            Log.i(TAG, "Updated fish: " + fish.toString());
+            SyncFishAquaRequest syncFishAquaRequest = new SyncFishAquaRequest(aquarium.getId(), fishIds);
+            Log.i(TAG, "Update with Id: " + fishIds.toString());
+            aquaApplicationService.syncFishInAquarium(syncFishAquaRequest).enqueue(new Callback<FishData>() {
+                @Override
+                public void onResponse(Call<FishData> call, Response<FishData> response) {
+                    if(response.body() != null){
+                        List<Fish> resultFishList = response.body().getData();
+                        if(resultFishList != null){
+                            for(Fish fish : resultFishList){
+                                Log.i(TAG, "Updated fish: " + fish.toString());
+                            }
                         }
+                        Toast.makeText(FishForAquariumActivity.this, "Cập nhật thành công!", Toast.LENGTH_SHORT).show();
+                    } else{
+                        Log.i(TAG, response.errorBody().toString());
+                        Toast.makeText(FishForAquariumActivity.this, "Cập nhật thất bại, đã có lỗi xảy ra!", Toast.LENGTH_SHORT).show();
                     }
-                    Toast.makeText(FishForAquariumActivity.this, "Cập nhật thành công!", Toast.LENGTH_SHORT).show();
-                } else{
-                    Log.i(TAG, response.errorBody().toString());
-                    Toast.makeText(FishForAquariumActivity.this, "Cập nhật thất bại, đã có lỗi xảy ra!", Toast.LENGTH_SHORT).show();
                 }
-            }
 
-            @Override
-            public void onFailure(Call<FishData> call, Throwable t) {
-                Log.e(TAG, t.getMessage());
-            }
-        });
+                @Override
+                public void onFailure(Call<FishData> call, Throwable t) {
+                    Log.e(TAG, t.getMessage());
+                }
+            });
+        } else {
+            Toast.makeText(this, "Bể cá của bạn đang trống", Toast.LENGTH_SHORT).show();
+        }
     }
 }

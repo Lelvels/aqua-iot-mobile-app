@@ -5,37 +5,74 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <ImageView
-        android:id="@+id/item_fish_image"
-        android:layout_width="120dp"
-        android:layout_height="80dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginBottom="12dp"
-        android:layout_marginTop="12dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0" />
+        <ImageView
+            android:id="@+id/item_fish_image"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0" />
 
-    <TextView
-        android:id="@+id/item_fish_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="36dp"
-        android:text="@string/fish_other_information_default"
-        android:textColor="@color/black"
-        android:textSize="21sp"
-        app:layout_constraintStart_toEndOf="@+id/item_fish_image"
-        app:layout_constraintTop_toTopOf="parent" />
+        <TextView
+            android:id="@+id/item_fish_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="12dp"
+            android:textStyle="bold"
+            android:text="@string/fish_other_information_default"
+            android:textColor="@color/black"
+            android:textSize="13sp"
+            app:layout_constraintStart_toEndOf="@+id/item_fish_image"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <CheckBox
-        android:id="@+id/item_fish_cb"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <CheckBox
+            android:id="@+id/item_fish_cb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/item_fish_des_pH"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="12dp"
+            android:text="@string/fish_other_information_default"
+            android:textColor="@color/black"
+            android:textSize="13sp"
+            app:layout_constraintStart_toEndOf="@+id/item_fish_image"
+            app:layout_constraintTop_toBottomOf="@+id/item_fish_name" />
+
+        <TextView
+            android:id="@+id/item_fish_des_Temp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="12dp"
+            android:text="@string/fish_other_information_default"
+            android:textColor="@color/black"
+            android:textSize="13sp"
+            app:layout_constraintStart_toEndOf="@+id/item_fish_image"
+            app:layout_constraintTop_toBottomOf="@+id/item_fish_des_pH" />
+
+        <TextView
+            android:id="@+id/item_fish_des_TDS"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="12dp"
+            android:text="@string/fish_other_information_default"
+            android:textColor="@color/black"
+            android:textSize="13sp"
+            app:layout_constraintStart_toEndOf="@+id/item_fish_image"
+            app:layout_constraintTop_toBottomOf="@+id/item_fish_des_Temp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
